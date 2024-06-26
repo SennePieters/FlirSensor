@@ -5,35 +5,6 @@ import os
 import time
 import random
 
-# Function to generate a bitmap image of a human body
-def generate_human_body_bitmap(width, height, body_temp, ambient_temp, file_path):
-    """
-    Generates a bitmap image simulating a human body with a specific temperature in an ambient environment.
-    Parameters:
-    width (int): Width of the bitmap image.
-    height (int): Height of the bitmap image.
-    body_temp (float): Temperature of the human body.
-    ambient_temp (float): Ambient temperature.
-    file_path (str): Path to save the bitmap image.
-    """
-    # Create an empty 2D array for temperature values
-    temperature_values = np.full((height, width), ambient_temp)
-    
-    # Define the human body region (a simple oval in the center)
-    for y in range(height):
-        for x in range(width):
-            if ((x - width // 2) ** 2) / (width // 4) ** 2 + ((y - height // 2) ** 2) / (height // 2) ** 2 <= 1:
-                temperature_values[y, x] = body_temp
-    
-    # Normalize temperature values to range [0, 255] for grayscale image
-    min_temp = min(body_temp, ambient_temp)
-    max_temp = max(body_temp, ambient_temp)
-    normalized_values = ((temperature_values - min_temp) / (max_temp - min_temp) * 255).astype(np.uint8)
-    
-    # Create a PIL image from the normalized values
-    image = Image.fromarray(normalized_values, mode='L')
-    image.save(file_path)
-
 # Function to map pixel values to temperatures
 def map_pixel_to_temperature(pixel_values, min_temp, max_temp):
     """
@@ -84,7 +55,7 @@ def generate_random_patient_id():
     Returns:
     str: Randomly generated patient ID.
     """
-    return str(random.randint(100, 999))
+    return str(random.randint(1, 999))
 
 # Function to generate a JSON filename
 def generate_json_filename(patient_id):
@@ -95,17 +66,36 @@ def generate_json_filename(patient_id):
     Returns:
     str: Generated JSON filename.
     """
-    current_time = time.strftime("%d%m-%H.%M")
-    filename = f"{current_time}-{patient_id}.json"
+    current_time = time.strftime("%d-%m--%H.%M")
+    filename = f"{current_time}--{patient_id}.json"
     return filename
+
+# Function to get the latest file from a directory
+def get_latest_file(directory):
+    """
+    Gets the latest file from a specified directory.
+    Parameters:
+    directory (str): Path to the directory.
+    Returns:
+    str: Path to the latest file.
+    """
+    if not os.path.exists(directory):
+        raise FileNotFoundError(f"The specified directory does not exist: {directory}")
+    
+    files = os.listdir(directory)
+    if not files:
+        raise FileNotFoundError(f"No files found in the directory: {directory}")
+    
+    paths = [os.path.join(directory, file) for file in files]
+    latest_file = max(paths, key=os.path.getctime)
+    return latest_file
 
 # Main function
 def main():
     # Configuration
-    width, height = 100, 100
-    body_temp = 37.0  # Human body temperature in degrees Celsius
     ambient_temp = 20.0  # Ambient temperature in degrees Celsius
-    bitmap_file_path = 'bmpOutput/thermal_image.bmp'
+    body_temp = 37.0  # Human body temperature in degrees Celsius
+    bitmap_folder_path = 'bmpOutput'  # Folder containing bitmap images
     patient_id = generate_random_patient_id()
     json_filename = generate_json_filename(patient_id)
     json_output_path = os.path.join('TempOutput', json_filename)
@@ -113,18 +103,26 @@ def main():
     # Ensure output directory exists
     os.makedirs(os.path.dirname(json_output_path), exist_ok=True)
 
-    # Generate and save the bitmap image
-    generate_human_body_bitmap(width, height, body_temp, ambient_temp, bitmap_file_path)
+    try:
+        # Get the latest bitmap file
+        latest_bitmap_file = get_latest_file(bitmap_folder_path)
+    except FileNotFoundError as e:
+        print(e)
+        return
 
     # Load the bitmap image and convert to temperature values
-    temperature_values = load_and_convert_bitmap(bitmap_file_path, ambient_temp, body_temp)
+    temperature_values = load_and_convert_bitmap(latest_bitmap_file, ambient_temp, body_temp)
 
     # Calculate the maximum temperature
     max_temperature = calculate_max_temperature(temperature_values)
 
-    # Write the maximum temperature to a JSON file
+    # Write the maximum temperature, patient ID, and current time to a JSON file
     with open(json_output_path, 'w') as json_file:
-        json.dump({'max_temperature': max_temperature}, json_file)
+        json.dump({
+            'max_temperature': max_temperature,
+            'patient_id': patient_id,
+            'timestamp': time.strftime("%Y-%m-%d %H:%M:%S")
+        }, json_file)
 
     print(f"Maximum Temperature: {max_temperature:.2f}°C")
     print(f"Temperature data saved to {json_output_path}")
