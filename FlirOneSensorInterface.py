@@ -90,12 +90,42 @@ def get_latest_file(directory):
     latest_file = max(paths, key=os.path.getctime)
     return latest_file
 
+# Function to check if a file has already been processed
+def is_file_processed(file_path, log_file_path):
+    """
+    Checks if a file has already been processed by looking in the log file.
+    Parameters:
+    file_path (str): Path to the file to check.
+    log_file_path (str): Path to the log file.
+    Returns:
+    bool: True if the file has been processed, False otherwise.
+    """
+    if not os.path.exists(log_file_path):
+        return False
+    
+    with open(log_file_path, 'r') as log_file:
+        processed_files = log_file.read().splitlines()
+    
+    return file_path in processed_files
+
+# Function to log a processed file
+def log_processed_file(file_path, log_file_path):
+    """
+    Logs a processed file by adding its path to the log file.
+    Parameters:
+    file_path (str): Path to the file to log.
+    log_file_path (str): Path to the log file.
+    """
+    with open(log_file_path, 'a') as log_file:
+        log_file.write(file_path + '\n')
+
 # Main function
 def main():
     # Configuration
     ambient_temp = 20.0  # Ambient temperature in degrees Celsius
     body_temp = 37.0  # Human body temperature in degrees Celsius
     bitmap_folder_path = 'SensorOutput'  # Folder containing bitmap images
+    log_file_path = 'processed_files.log'  # Log file to track processed files
     patient_id = generate_random_patient_id()
     json_filename = generate_json_filename(patient_id)
     json_output_path = os.path.join('TempOutput', json_filename)
@@ -108,6 +138,11 @@ def main():
         latest_bitmap_file = get_latest_file(bitmap_folder_path)
     except FileNotFoundError as e:
         print(e)
+        return
+
+    # Check if the file has already been processed
+    if is_file_processed(latest_bitmap_file, log_file_path):
+        print(f"The file {latest_bitmap_file} has already been processed.")
         return
 
     # Load the bitmap image and convert to temperature values
@@ -126,6 +161,9 @@ def main():
 
     print(f"Maximum Temperature: {max_temperature:.2f}°C")
     print(f"Temperature data saved to {json_output_path}")
+
+    # Log the processed file
+    log_processed_file(latest_bitmap_file, log_file_path)
 
 if __name__ == "__main__":
     main()
