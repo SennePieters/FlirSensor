@@ -14,8 +14,11 @@ def generate_random_temperature_bitmap(width, height, min_temp, max_temp, output
     max_temp (float): Maximum temperature value.
     output_folder (str): Path to the folder where the bitmap image will be saved.
     """
+    # Generate a random maximum temperature for this image
+    max_temperature = random.uniform(min_temp, max_temp)
+    
     # Create an array of random temperature values
-    temperature_values = np.random.uniform(min_temp, max_temp, (height, width))
+    temperature_values = np.random.uniform(min_temp, max_temperature, (height, width))
     
     # Normalize temperature values to range [0, 255] for grayscale image
     normalized_values = ((temperature_values - min_temp) / (max_temp - min_temp) * 255).astype(np.uint8)
@@ -28,10 +31,9 @@ def generate_random_temperature_bitmap(width, height, min_temp, max_temp, output
     
     # Generate the current time and a random patient number
     current_time = time.strftime("%d-%m--%H.%M")
-    patient_number = random.randint(1, 999)
     
     # Generate a filename with the current time and patient number
-    filename = f"{patient_number:03d}--{current_time}.bmp"
+    filename = f"{current_time}.bmp"
     file_path = os.path.join(output_folder, filename)
     
     # Save the image
