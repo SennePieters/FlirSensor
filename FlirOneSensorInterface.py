@@ -95,7 +95,7 @@ def main():
     # Configuration
     ambient_temp = 20.0  # Ambient temperature in degrees Celsius
     body_temp = 37.0  # Human body temperature in degrees Celsius
-    bitmap_folder_path = 'bmpOutput'  # Folder containing bitmap images
+    bitmap_folder_path = 'SensorOutput'  # Folder containing bitmap images
     patient_id = generate_random_patient_id()
     json_filename = generate_json_filename(patient_id)
     json_output_path = os.path.join('TempOutput', json_filename)
