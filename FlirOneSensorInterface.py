@@ -69,9 +69,20 @@ def process_new_file(file_path, patient_id):
 
     current_time = time.strftime("%Y-%m-%d %H:%M:%S")
 
+    # Prepare JSON data
+    data = {
+        'max_temperature': float(max_temperature),
+        'patient_id': patient_id,
+        'timestamp': current_time
+    }
+
+    # Write JSON data to file
+    with open(json_output_path, 'w') as json_file:
+        json.dump(data, json_file, indent=4)  # Pretty-print JSON for readability
+
     print(f"Maximum Temperature: {max_temperature:.2f}°C")
-    print(f"Temperature data saved to {json_output_path}")
     print(f"Time of measure: {current_time}")
+    print(f"Temperature data saved to {json_output_path}")
 
     log_processed_file(file_path, log_file_path)
 
