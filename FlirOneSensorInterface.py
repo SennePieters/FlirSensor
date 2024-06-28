@@ -54,8 +54,8 @@ def calculate_max_temperature(temperature_values):
 
 # Function to process a new bitmap file
 def process_new_file(file_path, patient_id):
-    ambient_temp = 20.0
-    body_temp = 37.0
+    ambient_temp = 30.0
+    body_temp = 43.0
 
     print(f"Processing file: {file_path}")
     
