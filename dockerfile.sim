@@ -1,0 +1,14 @@
+# Use a base image with Python
+FROM python:3.9-slim
+
+# Set the working directory
+WORKDIR /app
+
+# Copy the Python script into the container
+COPY second_script.py .
+
+# Install any required packages
+# RUN pip install -r requirements.txt (if you have dependencies)
+
+# Run the script every 10 seconds
+CMD ["sh", "-c", "while true; do python second_script.py; sleep 10; done"]

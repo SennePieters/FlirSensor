@@ -13,13 +13,20 @@ services:
     volumes:
       - influxdb-storage:/var/lib/influxdb
 
+  flir_sensor_sim:
+    build:
+      context: .
+      dockerfile: Dockerfile.sim
+    depends_on:
+      - influxdb
+
   flir_sensor:
     build:
       context: .
       dockerfile: dockerfile
     container_name: flir_sensor
     depends_on:
-      - influxdb
+      - flir_sensor
     environment:
       - PATIENT_ID=123
     volumes:
