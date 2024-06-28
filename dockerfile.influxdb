@@ -1,5 +1,0 @@
-# Use the official InfluxDB image for ARM architecture
-FROM influxdb:1.8-alpine
-
-# Expose the InfluxDB ports
-EXPOSE 8086
