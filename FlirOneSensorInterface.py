@@ -4,7 +4,7 @@ import os
 import time
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
-import influxdb_client
+from influxdb_client import InfluxDBClient, Point
 from influxdb_client.client.write_api import SYNCHRONOUS
 from datetime import datetime
 
@@ -34,19 +34,19 @@ def calculate_max_temperature(temperature_values):
 
 # Function to write data to InfluxDB
 def write_to_influxdb(max_temperature, patient_id, current_time):
-    influxdb_url = "http://192.168.0.206:8086/"
+    influxdb_url = "192.168.0.206:8086"
     token = "awPZYtjhw42qnoxpjux4ZVWEwfDWiBmrd3D33c6daNoJH2taRYhWWWwqwgLmb3ZlyB4pAbAWbYPMf3QGpL_-rQ=="
     org = "LIME"
     bucket = "flironesensor"
 
-    client = influxdb_client.InfluxDBClient(
+    client = InfluxDBClient(
         url=influxdb_url,
         token=token,
         org=org
     )
 
     write_api = client.write_api(write_options=SYNCHRONOUS)
-    data = influxdb_client.Point("measurement")\
+    data = Point("measurement")\
         .tag("patient_id", patient_id)\
         .field("max_temperature", float(max_temperature))\
         .time(current_time)
