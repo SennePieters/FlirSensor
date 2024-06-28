@@ -30,7 +30,7 @@ def generate_random_temperature_bitmap(width, height, min_temp, max_temp, output
     os.makedirs(output_folder, exist_ok=True)
     
     # Generate the current time and a random patient number
-    current_time = time.strftime("%d-%m--%H.%M")
+    current_time = time.strftime("%d-%m--%H.%M.%S")
     
     # Generate a filename with the current time and patient number
     filename = f"{current_time}.bmp"
