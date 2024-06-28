@@ -21,7 +21,7 @@ services:
     depends_on:
       - influxdb
     volumes:
-      - ./SensorOutput:/SensorOutput
+      - ./flir_sensor_sim_data:/app/data
 
   flir_sensor:
     build:
