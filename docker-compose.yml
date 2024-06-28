@@ -24,9 +24,9 @@ services:
     build:
       context: .
       dockerfile: dockerfile
-    container_name: flir_sensor_sim
+    container_name: flir_sensor
     depends_on:
-      - flir_sensor
+      - flir_sensor_sim
     environment:
       - PATIENT_ID=123
     volumes:
