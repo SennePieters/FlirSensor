@@ -7,5 +7,8 @@ WORKDIR /app
 # Copy the Python script into the container
 COPY . /app
 
+# Install dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
 # Run the script every 10 seconds
 CMD ["sh", "-c", "while true; do python FlirOneSensorSim.py; sleep 10; done"]
