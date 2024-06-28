@@ -8,7 +8,6 @@ WORKDIR /app
 COPY FlirOneSensorSim.py .
 
 # Install any required packages
-RUN pip install --no-cache-dir -r requirements.txt
 
 # Run the script every 10 seconds
 CMD ["python", "FlirOneSensorInterface.py"]
