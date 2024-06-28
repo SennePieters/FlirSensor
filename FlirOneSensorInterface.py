@@ -26,8 +26,8 @@ def load_and_convert_bitmap(file_path, min_temp, max_temp):
 @retry(stop_max_attempt_number=5, wait_fixed=10000)  # Retry up to 3 times with 2 seconds wait between retries
 def write_to_influxdb(max_temperature, patient_id, current_time):
     influxdb_url = "http://influxdb:8086"
-    token = "your-influxdb-token"
-    org = "your-org"
+    token = "awPZYtjhw42qnoxpjux4ZVWEwfDWiBmrd3D33c6daNoJH2taRYhWWWwqwgLmb3ZlyB4pAbAWbYPMf3QGpL_-rQ=="
+    org = "LIME"
     bucket = "flironesensor"
 
     client = InfluxDBClient(
