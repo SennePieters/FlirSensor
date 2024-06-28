@@ -81,18 +81,13 @@ class NewFileHandler(FileSystemEventHandler):
             print(f"New file detected: {event.src_path}")
             process_new_file(event.src_path, self.patient_id)
 
-# Function to ask for patient ID
-def ask_for_patient_id():
-    while True:
-        patient_id = input("Enter the patient ID (3 digits): ")
-        if patient_id.isdigit() and len(patient_id) == 3:
-            return patient_id
-        else:
-            print("Invalid patient ID. It should be a 3-digit number.")
-
 # Main function to start the file watcher
 def main():
-    patient_id = ask_for_patient_id()
+    patient_id = os.getenv('PATIENT_ID')
+    if not patient_id:
+        print("Error: PATIENT_ID environment variable not set.")
+        return
+
     bitmap_folder_path = 'SensorOutput'
     event_handler = NewFileHandler(patient_id)
     observer = Observer()

@@ -20,6 +20,8 @@ services:
     container_name: flir_sensor
     depends_on:
       - influxdb
+    environment:
+      - PATIENT_ID=123
     volumes:
       - ./SensorOutput:/SensorOutput
 
