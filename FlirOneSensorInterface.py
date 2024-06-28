@@ -88,7 +88,7 @@ def main():
         print("Error: PATIENT_ID environment variable not set.")
         return
 
-    bitmap_folder_path = 'SensorOutput'
+    bitmap_folder_path = '/app/SensorOutput'
     event_handler = NewFileHandler(patient_id)
     observer = Observer()
     observer.schedule(event_handler, bitmap_folder_path, recursive=False)

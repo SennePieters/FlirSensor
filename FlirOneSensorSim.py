@@ -45,7 +45,7 @@ def main():
     width, height = 100, 100
     min_temp = 30.0  # Minimum temperature in degrees Celsius
     max_temp = 43.0  # Maximum temperature in degrees Celsius
-    output_folder = 'SensorOutput'  # Folder to save the bitmap image
+    output_folder = '/app/SensorOutput'  # Folder to save the bitmap image
 
     # Generate and save the bitmap image
     generate_random_temperature_bitmap(width, height, min_temp, max_temp, output_folder)
