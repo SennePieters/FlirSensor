@@ -10,9 +10,8 @@ from datetime import datetime
 from retrying import retry
 import sys
 import logging
+logging.basicConfig(stream=sys.stdout)
 
-# Configure logging to print debug messages to stdout
-logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
 # Function to map pixel values to temperatures
 def map_pixel_to_temperature(pixel_values, min_temp, max_temp):
@@ -21,14 +20,14 @@ def map_pixel_to_temperature(pixel_values, min_temp, max_temp):
     return temperature_values
 
 # Retry decorator for handling PermissionError
-@retry(stop_max_attempt_number=5, wait_fixed=1000)  # Retry up to 5 times with 1 second wait between retries
+@retry(stop_max_attempt_number=5, wait_fixed=1000)
 def load_and_convert_bitmap(file_path, min_temp, max_temp):
     image = Image.open(file_path).convert('L')
     pixel_values = np.array(image)
     return map_pixel_to_temperature(pixel_values, min_temp, max_temp)
 
 # Retry decorator for handling network/connection errors
-@retry(stop_max_attempt_number=5, wait_fixed=10000)  # Retry up to 3 times with 2 seconds wait between retries
+@retry(stop_max_attempt_number=5, wait_fixed=10000)
 def write_to_influxdb(max_temperature, patient_id, current_time):
     influxdb_url = "http://influxdb:8086"
     token = "awPZYtjhw42qnoxpjux4ZVWEwfDWiBmrd3D33c6daNoJH2taRYhWWWwqwgLmb3ZlyB4pAbAWbYPMf3QGpL_-rQ=="
