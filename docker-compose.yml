@@ -21,7 +21,7 @@ services:
     depends_on:
       - influxdb
     volumes:
-      - ./SensorOutput:/SensorOutput
+      - ./SensorOutput:/app/SensorOutput
 
   flir_sensor:
     build:
@@ -33,7 +33,7 @@ services:
     environment:
       - PATIENT_ID=123
     volumes:
-      - ./SensorOutput:/SensorOutput
+      - ./SensorOutput:/app/SensorOutput
 
 volumes:
   influxdb-storage:
