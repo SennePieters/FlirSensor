@@ -1,10 +1,12 @@
 import numpy as np
 from PIL import Image
-import json
 import os
 import time
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
+import influxdb_client
+from influxdb_client.client.write_api import SYNCHRONOUS
+from datetime import datetime
 
 # Function to map pixel values to temperatures
 def map_pixel_to_temperature(pixel_values, min_temp, max_temp):
@@ -30,61 +32,43 @@ def load_and_convert_bitmap(file_path, min_temp, max_temp):
 def calculate_max_temperature(temperature_values):
     return np.max(temperature_values)
 
-# Function to generate a JSON filename
-def generate_json_filename(patient_id):
-    current_time = time.strftime("%d-%m--%H.%M")
-    filename = f"{current_time}--{patient_id}.json"
-    return filename
+# Function to write data to InfluxDB
+def write_to_influxdb(max_temperature, patient_id, current_time):
+    influxdb_url = "http://localhost:8086"
+    token = "MWvTgNMvClxm4CkZuUTvp4VHYHE_ifm3RCvbu45Gg3ZQjS33mBp_RCCcbf0bBBkVrwsFs5m_r1nz6G6Gmc5ojQ=="
+    org = "LIME"
+    bucket = "flironesensor"
 
-# Function to check if a file has already been processed
-def is_file_processed(file_path, log_file_path):
-    if not os.path.exists(log_file_path):
-        return False
-    with open(log_file_path, 'r') as log_file:
-        processed_files = log_file.read().splitlines()
-    return file_path in processed_files
+    client = influxdb_client.InfluxDBClient(
+        url=influxdb_url,
+        token=token,
+        org=org
+    )
 
-# Function to log a processed file
-def log_processed_file(file_path, log_file_path):
-    with open(log_file_path, 'a') as log_file:
-        log_file.write(file_path + '\n')
+    write_api = client.write_api(write_options=SYNCHRONOUS)
+    data = influxdb_client.Point("measurement")\
+        .tag("patient_id", patient_id)\
+        .field("max_temperature", float(max_temperature))\
+        .time(current_time)
+    write_api.write(bucket=bucket, org=org, record=data)
+
+    print("Data written to InfluxDB successfully.")
 
 # Function to process a new bitmap file
 def process_new_file(file_path, patient_id):
     ambient_temp = 20.0
     body_temp = 37.0
-    log_file_path = 'Log/processed_files.log'
-    
-    json_filename = generate_json_filename(patient_id)
-    json_output_path = os.path.join('TempOutput', json_filename)
 
-    os.makedirs(os.path.dirname(json_output_path), exist_ok=True)
-
-    if is_file_processed(file_path, log_file_path):
-        print(f"The file {file_path} has already been processed.")
-        return
-
+    print(f"Processing file: {file_path}")
     temperature_values = load_and_convert_bitmap(file_path, ambient_temp, body_temp)
     max_temperature = calculate_max_temperature(temperature_values)
-
-    current_time = time.strftime("%Y-%m-%d %H:%M:%S")
-
-    # Prepare JSON data
-    data = {
-        'max_temperature': float(max_temperature),
-        'patient_id': patient_id,
-        'timestamp': current_time
-    }
-
-    # Write JSON data to file
-    with open(json_output_path, 'w') as json_file:
-        json.dump(data, json_file, indent=4)  # Pretty-print JSON for readability
+    current_time = datetime.utcnow().isoformat()
 
     print(f"Maximum Temperature: {max_temperature:.2f}°C")
     print(f"Time of measure: {current_time}")
-    print(f"Temperature data saved to {json_output_path}")
 
-    log_processed_file(file_path, log_file_path)
+    # Write data to InfluxDB
+    write_to_influxdb(max_temperature, patient_id, current_time)
 
 # File system event handler
 class NewFileHandler(FileSystemEventHandler):
@@ -94,6 +78,7 @@ class NewFileHandler(FileSystemEventHandler):
 
     def on_created(self, event):
         if not event.is_directory and event.src_path.endswith('.bmp'):
+            print(f"New file detected: {event.src_path}")
             process_new_file(event.src_path, self.patient_id)
 
 # Function to ask for patient ID
@@ -113,6 +98,8 @@ def main():
     observer = Observer()
     observer.schedule(event_handler, bitmap_folder_path, recursive=False)
     observer.start()
+
+    print(f"Started monitoring {bitmap_folder_path} for new files...")
 
     try:
         while True:
