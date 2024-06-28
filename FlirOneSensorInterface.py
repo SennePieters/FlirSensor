@@ -34,7 +34,7 @@ def calculate_max_temperature(temperature_values):
 
 # Function to write data to InfluxDB
 def write_to_influxdb(max_temperature, patient_id, current_time):
-    influxdb_url = "http://localhost:8086"
+    influxdb_url = "http://192.168.0.206:8086/"
     token = "MWvTgNMvClxm4CkZuUTvp4VHYHE_ifm3RCvbu45Gg3ZQjS33mBp_RCCcbf0bBBkVrwsFs5m_r1nz6G6Gmc5ojQ=="
     org = "LIME"
     bucket = "flironesensor"
