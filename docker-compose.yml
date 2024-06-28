@@ -16,7 +16,7 @@ services:
   flir_sensor_sim:
     build:
       context: .
-      dockerfile: Dockerfile.sim
+      dockerfile: dockerfile.sim
     depends_on:
       - influxdb
 
