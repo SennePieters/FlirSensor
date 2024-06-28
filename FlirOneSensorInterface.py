@@ -11,7 +11,7 @@ from retrying import retry
 import sys
 import logging
 
-logging.basicConfig(stream=sys.stdout)
+logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 class ModuleFilter(logging.Filter):
     def __init__(self, module_name):
         super().__init__()
