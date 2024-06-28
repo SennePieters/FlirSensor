@@ -5,9 +5,7 @@ FROM python:3.9-slim
 WORKDIR /app
 
 # Copy the Python script into the container
-COPY FlirOneSensorSim.py .
-
-# Install any required packages
+COPY . /app
 
 # Run the script every 10 seconds
-CMD ["python", "FlirOneSensorInterface.py"]
+CMD ["sh", "-c", "while true; do python FlirOneSensorSim.py; sleep 10; done"]
