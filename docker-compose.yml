@@ -2,22 +2,26 @@ version: '3.8'
 
 services:
   influxdb:
-    build:
-      context: .
-      dockerfile: Dockerfile.influxdb
+    image: influxdb:2.0
+    container_name: influxdb
     ports:
       - "8086:8086"
+    environment:
+      - INFLUXDB_DB=flironesensor
+      - INFLUXDB_ADMIN_USER=senne
+      - INFLUXDB_ADMIN_PASSWORD=12345678
     volumes:
       - influxdb-storage:/var/lib/influxdb
 
-  python-app:
+  flir_sensor:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: dockerfile
+    container_name: flir_sensor
     depends_on:
       - influxdb
     volumes:
-      - ./SensorOutput:/app/SensorOutput
+      - ./SensorOutput:/SensorOutput
 
 volumes:
   influxdb-storage:
