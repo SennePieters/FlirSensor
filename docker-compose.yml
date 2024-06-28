@@ -29,7 +29,7 @@ services:
       dockerfile: dockerfile
     container_name: flir_sensor
     depends_on:
-      - flir_sensor_sim
+      - influxdb
     environment:
       - PATIENT_ID=123
     volumes:
