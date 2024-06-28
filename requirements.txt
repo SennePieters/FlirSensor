@@ -2,3 +2,4 @@ numpy
 pillow
 watchdog
 influxdb-client
+retrying

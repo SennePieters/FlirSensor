@@ -7,6 +7,7 @@ from watchdog.events import FileSystemEventHandler
 from influxdb_client import InfluxDBClient, Point
 from influxdb_client.client.write_api import SYNCHRONOUS
 from datetime import datetime
+from retrying import retry  # Import retry decorator
 
 # Function to map pixel values to temperatures
 def map_pixel_to_temperature(pixel_values, min_temp, max_temp):
@@ -14,29 +15,19 @@ def map_pixel_to_temperature(pixel_values, min_temp, max_temp):
     temperature_values = normalized_pixel_values * (max_temp - min_temp) + min_temp
     return temperature_values
 
-# Function to load the bitmap image and convert it to temperature values
+# Retry decorator for handling PermissionError
+@retry(stop_max_attempt_number=5, wait_fixed=1000)  # Retry up to 5 times with 1 second wait between retries
 def load_and_convert_bitmap(file_path, min_temp, max_temp):
-    retry_count = 5
-    for i in range(retry_count):
-        try:
-            image = Image.open(file_path).convert('L')
-            break
-        except PermissionError:
-            time.sleep(1)
-            if i == retry_count - 1:
-                raise
+    image = Image.open(file_path).convert('L')
     pixel_values = np.array(image)
     return map_pixel_to_temperature(pixel_values, min_temp, max_temp)
 
-# Function to calculate the maximum temperature
-def calculate_max_temperature(temperature_values):
-    return np.max(temperature_values)
-
-# Function to write data to InfluxDB
+# Retry decorator for handling network/connection errors
+@retry(stop_max_attempt_number=5, wait_fixed=10000)  # Retry up to 3 times with 2 seconds wait between retries
 def write_to_influxdb(max_temperature, patient_id, current_time):
     influxdb_url = "http://influxdb:8086"
-    token = "awPZYtjhw42qnoxpjux4ZVWEwfDWiBmrd3D33c6daNoJH2taRYhWWWwqwgLmb3ZlyB4pAbAWbYPMf3QGpL_-rQ=="
-    org = "LIME"
+    token = "your-influxdb-token"
+    org = "your-org"
     bucket = "flironesensor"
 
     client = InfluxDBClient(
@@ -54,21 +45,30 @@ def write_to_influxdb(max_temperature, patient_id, current_time):
 
     print("Data written to InfluxDB successfully.")
 
+# Function to calculate the maximum temperature
+def calculate_max_temperature(temperature_values):
+    return np.max(temperature_values)
+
 # Function to process a new bitmap file
 def process_new_file(file_path, patient_id):
     ambient_temp = 20.0
     body_temp = 37.0
 
     print(f"Processing file: {file_path}")
-    temperature_values = load_and_convert_bitmap(file_path, ambient_temp, body_temp)
-    max_temperature = calculate_max_temperature(temperature_values)
-    current_time = datetime.utcnow().isoformat()
+    
+    try:
+        temperature_values = load_and_convert_bitmap(file_path, ambient_temp, body_temp)
+        max_temperature = calculate_max_temperature(temperature_values)
+        current_time = datetime.utcnow().isoformat()
 
-    print(f"Maximum Temperature: {max_temperature:.2f}°C")
-    print(f"Time of measure: {current_time}")
+        print(f"Maximum Temperature: {max_temperature:.2f}°C")
+        print(f"Time of measure: {current_time}")
 
-    # Write data to InfluxDB
-    write_to_influxdb(max_temperature, patient_id, current_time)
+        # Write data to InfluxDB
+        write_to_influxdb(max_temperature, patient_id, current_time)
+    
+    except Exception as e:
+        print(f"Failed to process file {file_path}: {e}")
 
 # File system event handler
 class NewFileHandler(FileSystemEventHandler):
