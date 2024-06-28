@@ -10,16 +10,7 @@ from datetime import datetime
 from retrying import retry
 import sys
 import logging
-
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
-class ModuleFilter(logging.Filter):
-    def __init__(self, module_name):
-        super().__init__()
-        self.module_name = module_name
-    def filter(self, record):        
-        return not record.name.startswith(self.module_name)
-watchdog_filter = ModuleFilter('watchdog')
-logging.getLogger().addFilter(watchdog_filter)
 
 # Function to map pixel values to temperatures
 def map_pixel_to_temperature(pixel_values, min_temp, max_temp):
