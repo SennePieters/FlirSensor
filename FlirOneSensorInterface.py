@@ -7,7 +7,12 @@ from watchdog.events import FileSystemEventHandler
 from influxdb_client import InfluxDBClient, Point
 from influxdb_client.client.write_api import SYNCHRONOUS
 from datetime import datetime
-from retrying import retry  # Import retry decorator
+from retrying import retry
+import sys
+import logging
+
+# Configure logging to print debug messages to stdout
+logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
 # Function to map pixel values to temperatures
 def map_pixel_to_temperature(pixel_values, min_temp, max_temp):
