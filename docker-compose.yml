@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  influxdb:
+    build:
+      context: .
+      dockerfile: Dockerfile.influxdb
+    ports:
+      - "8086:8086"
+    volumes:
+      - influxdb-storage:/var/lib/influxdb
+
+  python-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - influxdb
+    volumes:
+      - ./SensorOutput:/app/SensorOutput
+
+volumes:
+  influxdb-storage:
