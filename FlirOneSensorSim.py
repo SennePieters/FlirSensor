@@ -44,7 +44,7 @@ def main():
     # Configuration
     width, height = 100, 100
     min_temp = 36.0  # Minimum temperature in degrees Celsius
-    max_temp = 40.0  # Maximum temperature in degrees Celsius
+    max_temp = 41.0  # Maximum temperature in degrees Celsius
     output_folder = '/app/SensorOutput'  # Folder to save the bitmap image
 
     # Generate and save the bitmap image
