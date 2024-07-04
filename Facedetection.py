@@ -6,8 +6,8 @@ import time
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
 #Directory met de gezichten & output directory voor cropped images
-IMAGE_DIR = "input_images"
-OUTPUT_DIR = "output_faces"
+IMAGE_DIR = "SensorOutput"
+OUTPUT_DIR = "SensorOutputCropped"
 
 #Als "output_faces" niet bestaat maakt die de directory aan
 if not os.path.exists(OUTPUT_DIR):
